@@ -1,10 +1,12 @@
 const gulp = require('gulp');
-const browserSync = require('browser-sync');
+const sass = require('gulp-sass');
 const babel = require('gulp-babel');
 const uglify = require('gulp-uglify');
-const cleanCss = require('gulp-clean-css');
 const rename = require('gulp-rename');
+const browserSync = require('browser-sync');
+const browserify = require('browserify');
 
+// Spin up a local web server on localhost:3000
 function serve() {
   return browserSync.init({
     server: 'build',
@@ -12,49 +14,60 @@ function serve() {
     port: 3000
   });
 }
+
+// Watch for changes in app directory
 function watch() {
   gulp.watch('app/scripts/*.js', processJs);
-  gulp.watch('app/styles/*.css', processCss);
+  gulp.watch([
+    'app/styles/*.scss',
+    'app/styles/**/*.scss'
+  ], processCss);
+  gulp.watch('app/index.html', processHtml).on('change', browserSync.reload);
 }
 gulp.task('watch', watch);
-gulp.task('start', gulp.series(copy, processJs, processCss, gulp.parallel(serve, watch)));
+gulp.task('start', gulp.series(processImgs, processHtml, processJs, processCss, gulp.parallel(serve, watch)));
 
 
-function copy() {
-  return gulp.src([
-    'app/*.html',
-    'app/**/*.jpg',
-    // 'app/**/*.css',
-    // 'app/**/*.js'
-  ])
-  .pipe(gulp.dest('build'));
+function processImgs() {
+  return gulp.src('app/**/*.jpg')
+    .pipe(gulp.dest('build'));
 }
-gulp.task('copy', copy);
+gulp.task('processImgs', processImgs);
+
+
+function processHtml() {
+  return gulp.src('app/index.html')
+    .pipe(gulp.dest('build'));
+}
+gulp.task('processHtml', processHtml);
 
 
 function processCss() {
-  return gulp.src('app/styles/*.css')
-  .pipe(cleanCss())
-  .pipe(rename({
-    suffix: '.min'
-  }))
-  .pipe(gulp.dest('build/styles'));
+  return gulp.src('app/styles/main.scss')
+    .pipe(sass({
+      errorLogToConsole: true,
+      outputStyle: 'compressed'
+    }))
+    .on('error', console.error.bind(console))
+    .pipe(rename({
+      suffix: '.min'
+    }))
+    .pipe(gulp.dest('build/styles'))
+    .pipe(browserSync.stream());
 }
 gulp.task('processCss', processCss);
 
 
 function processJs() {
   return gulp.src('app/scripts/*.js')
-  .pipe(babel({
+    .pipe(babel({
       presets: ['env']
-  }))
-  .pipe(uglify())
-  .pipe(rename({
-    suffix: '.min'
-  }))
-  .pipe(gulp.dest('build/scripts'));
+    }))
+    .pipe(uglify())
+    .pipe(rename({
+      suffix: '.min'
+    }))
+    .pipe(gulp.dest('build/scripts'))
+    .pipe(browserSync.stream());
 }
 gulp.task('processJs', processJs);
-
-
-
