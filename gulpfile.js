@@ -54,6 +54,7 @@ function processCss() {
   //   .pipe(gulp.dest('build/styles'))
   //   .pipe(browserSync.stream());
   const postcss = require('gulp-postcss');
+  const cleanCss = require('gulp-clean-css');
   const tailwindcss = require('tailwindcss');
 
   return gulp.src('app/styles/main.css')
@@ -62,6 +63,7 @@ function processCss() {
       tailwindcss('./tailwind.js'),
       require('autoprefixer'),
     ]))
+    .pipe(cleanCss())
     .pipe(rename({
        suffix: '.min'
      }))
