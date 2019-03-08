@@ -1,7 +1,4 @@
 const gulp = require('gulp');
-const sass = require('gulp-sass');
-const babel = require('gulp-babel');
-const uglify = require('gulp-uglify');
 const rename = require('gulp-rename');
 const browserSync = require('browser-sync');
 const browserify = require('browserify');
@@ -11,8 +8,8 @@ const sourcemaps = require('gulp-sourcemaps');
 function serve() {
   return browserSync.init({
     server: 'build',
-    open: false,
-    port: 3000
+    open: true,
+    port: 8000
   });
 }
 
@@ -20,8 +17,7 @@ function serve() {
 function watch() {
   gulp.watch('app/scripts/*.js', processJs);
   gulp.watch([
-    'app/styles/*.scss',
-    'app/styles/**/*.scss'
+    'app/styles/*.css'
   ], processCss);
   gulp.watch('app/index.html', processHtml).on('change', browserSync.reload);
 }
@@ -44,16 +40,31 @@ gulp.task('processHtml', processHtml);
 
 // maps scss file, compiles and minifies
 function processCss() {
-  return gulp.src('app/styles/main.scss')
+  // return gulp.src('app/styles/main.scss')
+  //   .pipe(sourcemaps.init())
+  //   .pipe(sass({
+  //     errorLogToConsole: true,
+  //     outputStyle: 'compressed'
+  //   }))
+  //   .on('error', console.error.bind(console))
+  //   .pipe(rename({
+  //     suffix: '.min'
+  //   }))
+  //   .pipe(sourcemaps.write('./'))
+  //   .pipe(gulp.dest('build/styles'))
+  //   .pipe(browserSync.stream());
+  const postcss = require('gulp-postcss');
+  const tailwindcss = require('tailwindcss');
+
+  return gulp.src('app/styles/main.css')
     .pipe(sourcemaps.init())
-    .pipe(sass({
-      errorLogToConsole: true,
-      outputStyle: 'compressed'
-    }))
-    .on('error', console.error.bind(console))
+    .pipe(postcss([
+      tailwindcss('./tailwind.js'),
+      require('autoprefixer'),
+    ]))
     .pipe(rename({
-      suffix: '.min'
-    }))
+       suffix: '.min'
+     }))
     .pipe(sourcemaps.write('./'))
     .pipe(gulp.dest('build/styles'))
     .pipe(browserSync.stream());
@@ -62,6 +73,9 @@ gulp.task('processCss', processCss);
 
 // maps js file, compiles and minifies
 function processJs() {
+  const babel = require('gulp-babel');
+  const uglify = require('gulp-uglify');
+
   return gulp.src('app/scripts/*.js')
     .pipe(sourcemaps.init())
     .pipe(babel({
