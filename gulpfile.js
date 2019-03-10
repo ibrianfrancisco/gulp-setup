@@ -1,7 +1,6 @@
 const gulp = require('gulp');
 const rename = require('gulp-rename');
 const browserSync = require('browser-sync');
-const browserify = require('browserify');
 const sourcemaps = require('gulp-sourcemaps');
 
 // Spin up a local dev server on localhost:3000
@@ -39,7 +38,7 @@ function processHtml() {
 gulp.task('processHtml', processHtml);
 
 // maps scss file, compiles and minifies
-function processCss() {
+function processCss(done) {
   const sass = require('gulp-sass');
   const postcss = require('gulp-postcss');
   const tailwindcss = require('tailwindcss');
@@ -62,25 +61,43 @@ function processCss() {
     .pipe(concat('main.min.css'))
     .pipe(gulp.dest('build/styles'))
     .pipe(browserSync.stream());
+    done();
 }
 gulp.task('processCss', processCss);
 
-// maps js file, compiles and minifies
-function processJs() {
-  const babel = require('gulp-babel');
-  const uglify = require('gulp-uglify');
+// maps js files, compiles and minifies
+function processJs(done) {
+  const jsSRC = 'main.js';
+  const jsFolder = 'app/scripts/';
+  const jsFILES = [jsSRC];
 
-  return gulp.src('app/scripts/*.js')
-  .pipe(sourcemaps.init())
-    .pipe(babel({
+  const babelify = require('babelify')
+  const browserify = require('browserify');
+  const uglify = require('gulp-uglify');
+  const source = require('vinyl-source-stream');
+  const buffer = require('vinyl-buffer');
+
+  jsFILES.map(function(entry) {
+    return browserify({
+      entries: [jsFolder + entry]
+    })
+    .transform(babelify, {
       presets: ['env']
-    }))
-    .pipe(uglify())
+    })
+    .bundle()
+    .pipe(source(entry))
     .pipe(rename({
       suffix: '.min'
     }))
+    .pipe(buffer())
+    .pipe(sourcemaps.init({
+      loadMaps: true
+    }))
+    .pipe(uglify())
     .pipe(sourcemaps.write('./'))
     .pipe(gulp.dest('build/scripts'))
     .pipe(browserSync.stream());
+  })
+  done();
 }
 gulp.task('processJs', processJs);

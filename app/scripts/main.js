@@ -1,3 +1,3 @@
-window.addEventListener('load', () => {
-  console.log('hello');
-});
+require('./main2.js');
+
+console.log('hello');
