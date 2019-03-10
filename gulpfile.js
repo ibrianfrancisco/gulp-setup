@@ -55,7 +55,9 @@ function processCss() {
   //   .pipe(browserSync.stream());
   const postcss = require('gulp-postcss');
   const cleanCss = require('gulp-clean-css');
+  const purgecss = require('gulp-purgecss')
   const tailwindcss = require('tailwindcss');
+  const concat = require('gulp-concat');
 
   return gulp.src('app/styles/main.css')
     .pipe(sourcemaps.init())
@@ -63,10 +65,13 @@ function processCss() {
       tailwindcss('./tailwind.js'),
       require('autoprefixer'),
     ]))
-    .pipe(cleanCss())
-    .pipe(rename({
-       suffix: '.min'
-     }))
+    // uncomment when build is ready for production
+    // .pipe(
+    //   purgecss({
+    //     content: ['app/*.html']
+    //   }))
+    .pipe(cleanCss({compatibility: 'ie8'}))
+    .pipe(concat('main.css'))
     .pipe(sourcemaps.write('./'))
     .pipe(gulp.dest('build/styles'))
     .pipe(browserSync.stream());
@@ -89,7 +94,6 @@ function processJs() {
     }))
     .pipe(sourcemaps.write('./'))
     .pipe(gulp.dest('build/scripts'))
-
     .pipe(browserSync.stream());
 }
 gulp.task('processJs', processJs);
