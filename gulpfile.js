@@ -17,7 +17,7 @@ function serve() {
 function watch() {
   gulp.watch('app/scripts/*.js', processJs);
   gulp.watch([
-    'app/styles/*.css'
+    'app/styles/*.scss'
   ], processCss);
   gulp.watch('app/index.html', processHtml).on('change', browserSync.reload);
 }
@@ -40,27 +40,15 @@ gulp.task('processHtml', processHtml);
 
 // maps scss file, compiles and minifies
 function processCss() {
-  // return gulp.src('app/styles/main.scss')
-  //   .pipe(sourcemaps.init())
-  //   .pipe(sass({
-  //     errorLogToConsole: true,
-  //     outputStyle: 'compressed'
-  //   }))
-  //   .on('error', console.error.bind(console))
-  //   .pipe(rename({
-  //     suffix: '.min'
-  //   }))
-  //   .pipe(sourcemaps.write('./'))
-  //   .pipe(gulp.dest('build/styles'))
-  //   .pipe(browserSync.stream());
+  const sass = require('gulp-sass');
   const postcss = require('gulp-postcss');
-  const cleanCss = require('gulp-clean-css');
-  const purgecss = require('gulp-purgecss')
   const tailwindcss = require('tailwindcss');
+  const purgecss = require('gulp-purgecss')
+  const cleanCss = require('gulp-clean-css');
   const concat = require('gulp-concat');
 
-  return gulp.src('app/styles/main.css')
-    .pipe(sourcemaps.init())
+  return gulp.src('app/styles/main.scss')
+    .pipe(sass())
     .pipe(postcss([
       tailwindcss('./tailwind.js'),
       require('autoprefixer'),
@@ -71,8 +59,7 @@ function processCss() {
     //     content: ['app/*.html']
     //   }))
     .pipe(cleanCss({compatibility: 'ie8'}))
-    .pipe(concat('main.css'))
-    .pipe(sourcemaps.write('./'))
+    .pipe(concat('main.min.css'))
     .pipe(gulp.dest('build/styles'))
     .pipe(browserSync.stream());
 }
@@ -84,7 +71,7 @@ function processJs() {
   const uglify = require('gulp-uglify');
 
   return gulp.src('app/scripts/*.js')
-    .pipe(sourcemaps.init())
+  .pipe(sourcemaps.init())
     .pipe(babel({
       presets: ['env']
     }))

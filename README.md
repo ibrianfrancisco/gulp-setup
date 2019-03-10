@@ -3,12 +3,12 @@
 #### Description
 My gulp setup used to create and design static sites quickly. Tasks that are automated: 
 
-- Compiling SCSS to CSS and ES6 to JS
+- Compiles SCSS to CSS and ES6 to JS
+- PurgeCSS removes unused CSS
 - Soft refresh when files are changed
 - Minifying CSS and JS files
-- Renaming minified files
 
-#### Modules Used:
+#### Plugins Used:
 
 - Gulp
 - Browser Sync
@@ -18,6 +18,9 @@ My gulp setup used to create and design static sites quickly. Tasks that are aut
 - Sourcemaps
 - Uglify
 - Gulp Rename
+- Post CSS
+- Purge CSS
+- Tailwind CSS
 
 #### Getting Started
 
@@ -30,3 +33,4 @@ My gulp setup used to create and design static sites quickly. Tasks that are aut
 
 ### Future updates
 * Add image optimizer
+* Remove redundant plugins
